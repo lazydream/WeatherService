@@ -93,7 +93,7 @@ public class WeatherTask extends AsyncTask {
 
                 JSONArray weatherinweatgerArray = object.getJSONArray("weather");
                 ArrayList<Weather> wwArray = new ArrayList<>();
-                for (int j=0;j<weatherinweatgerArray.length(); j++) {
+                for (int j=0;j<weatherinweatgerArray.length()-1; j++) {
                     JSONObject wwObject = weatherinweatgerArray.getJSONObject(i);
                     int id = wwObject.getInt("id");
                     String mainString = wwObject.getString("main");
@@ -113,12 +113,19 @@ public class WeatherTask extends AsyncTask {
                 Wind wind = new Wind(speed, deg);
 
                 JSONObject rainObject = object.getJSONObject("rain");
-                double rainVal = rainObject.getDouble("3h");
+                double rainVal;
+                if (rainObject.has("3h")) {
+                    rainVal = rainObject.getDouble("3h");
+                } else {
+                    rainVal =0;
+                }
                 Rain rain = new Rain(rainVal);
 
                 JSONObject wwSysObject = object.getJSONObject("sys");
-                String date = wwSysObject.getString("dt_txt");
-                Sys2 sys2 = new Sys2(date);
+                String pod = wwSysObject.getString("pod");
+                Sys2 sys2 = new Sys2(pod);
+
+                String date = object.getString("dt_txt");
 
                 List newListMember = new List(dt, main, wwArray, clouds, wind, rain, sys2, date);
                 weatherList.add(newListMember);

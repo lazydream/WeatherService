@@ -15,6 +15,9 @@ public class WeatherRecord extends SugarRecord {
     private int cnt;
     private ArrayList <List> list;
 
+    public WeatherRecord() {
+    }
+
     public WeatherRecord(City city, String cod, double message, int cnt, ArrayList<List> list) {
         this.city = city;
         this.cod = cod;
