@@ -13,6 +13,7 @@ import com.example.kazimir.weatherservice.Models.Weather.Sys;
 import com.example.kazimir.weatherservice.Models.Weather.Sys2;
 import com.example.kazimir.weatherservice.Models.Weather.Weather;
 import com.example.kazimir.weatherservice.Models.Weather.WeatherRecord;
+import com.example.kazimir.weatherservice.Models.Weather.WeatherRoot;
 import com.example.kazimir.weatherservice.Models.Weather.Wind;
 import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
@@ -81,6 +82,7 @@ public class WeatherTask extends AsyncTask {
 
                 JSONObject mainObject = object.getJSONObject("main");
                 double temp = mainObject.getDouble("temp");
+                Log.d("Database", String.valueOf(temp));
                 double temp_min = mainObject.getDouble("temp_min");
                 double temp_max = mainObject.getDouble("temp_max");
                 double pressure = mainObject.getDouble("pressure");
@@ -93,7 +95,7 @@ public class WeatherTask extends AsyncTask {
 
                 JSONArray weatherinweatgerArray = object.getJSONArray("weather");
                 ArrayList<Weather> wwArray = new ArrayList<>();
-                for (int j=0;j<weatherinweatgerArray.length()-1; j++) {
+                for (int j=0;j<weatherinweatgerArray.length(); j++) {
                     JSONObject wwObject = weatherinweatgerArray.getJSONObject(i);
                     int id = wwObject.getInt("id");
                     String mainString = wwObject.getString("main");
@@ -130,15 +132,14 @@ public class WeatherTask extends AsyncTask {
                 List newListMember = new List(dt, main, wwArray, clouds, wind, rain, sys2, date);
                 weatherList.add(newListMember);
                 Log.d("Database", "New label added");
+                WeatherRecord record = new WeatherRecord(temp, temp_min, temp_max, speed, pressure, cityName, wwArray.get(0).getMain(), wwArray.get(0).getDescription(), date);
+                record.save();
             }
-
-            WeatherRecord record = new WeatherRecord(city, cod, message, cnt, weatherList);
-            record.save();
 
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  null;
+        return null;
     }
 }

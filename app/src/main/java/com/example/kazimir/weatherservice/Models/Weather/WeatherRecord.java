@@ -9,60 +9,64 @@ import java.util.ArrayList;
  */
 
 public class WeatherRecord extends SugarRecord {
-    private City city;
-    private String cod;
-    private double message;
-    private int cnt;
-    private ArrayList <List> list;
+    private double temp;
+    private double temp_min;
+    private double temp_max;
+    private double pressure;
+    private double windSpeed;
+    private String city;
+    private String weatherMain;
+    private String getWeatherDescription;
+    private String dateAndTime;
 
-    public WeatherRecord() {
-    }
-
-    public WeatherRecord(City city, String cod, double message, int cnt, ArrayList<List> list) {
+    public WeatherRecord(double temp, double temp_min, double temp_max, double windSpeed, double pressure, String city, String weatherMain, String getWeatherDescription, String dateAndTime) {
+        this.temp = temp;
+        this.temp_min = temp_min;
+        this.temp_max = temp_max;
+        this.windSpeed = windSpeed;
+        this.pressure = pressure;
         this.city = city;
-        this.cod = cod;
-        this.message = message;
-        this.cnt = cnt;
-        this.list = list;
+        this.weatherMain = weatherMain;
+        this.getWeatherDescription = getWeatherDescription;
+        this.dateAndTime = dateAndTime;
     }
 
-    public City getCity() {
+    public double getTemp() {
+        return temp;
+    }
+
+    public double getTemp_min() {
+        return temp_min;
+    }
+
+    public double getTemp_max() {
+        return temp_max;
+    }
+
+    public double getPressure() {
+        return pressure;
+    }
+
+    public double getWindSpeed() {
+        return windSpeed;
+    }
+
+    public String getCity() {
         return city;
     }
 
-    public void setCity(City city) {
-        this.city = city;
+    public String getWeatherMain() {
+        return weatherMain;
     }
 
-    public String getCod() {
-        return cod;
+    public String getGetWeatherDescription() {
+        return getWeatherDescription;
     }
 
-    public void setCod(String cod) {
-        this.cod = cod;
+    public String getDateAndTime() {
+        return dateAndTime;
     }
 
-    public double getMessage() {
-        return message;
-    }
-
-    public void setMessage(double message) {
-        this.message = message;
-    }
-
-    public int getCnt() {
-        return cnt;
-    }
-
-    public void setCnt(int cnt) {
-        this.cnt = cnt;
-    }
-
-    public ArrayList<List> getList() {
-        return list;
-    }
-
-    public void setList(ArrayList<List> list) {
-        this.list = list;
+    public WeatherRecord() {
     }
 }
