@@ -1,6 +1,7 @@
 package com.example.kazimir.weatherservice.AsyncTasks;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.kazimir.weatherservice.Models.Weather.City;
 import com.example.kazimir.weatherservice.Models.Weather.Clouds;
@@ -11,6 +12,7 @@ import com.example.kazimir.weatherservice.Models.Weather.Rain;
 import com.example.kazimir.weatherservice.Models.Weather.Sys;
 import com.example.kazimir.weatherservice.Models.Weather.Sys2;
 import com.example.kazimir.weatherservice.Models.Weather.Weather;
+import com.example.kazimir.weatherservice.Models.Weather.WeatherRecord;
 import com.example.kazimir.weatherservice.Models.Weather.Wind;
 import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
@@ -35,6 +37,10 @@ public class WeatherTask extends AsyncTask {
             connection.setRequestMethod("GET");
             connection.connect();
             String response = CharStreams.toString(new InputStreamReader(connection.getInputStream()));
+
+            //Очистили БД от предыдущих запросов
+            WeatherRecord.deleteAll(WeatherRecord.class);
+
             //Получили весь JSON
             JSONObject jsonObject = new JSONObject(response);
 
@@ -117,8 +123,11 @@ public class WeatherTask extends AsyncTask {
 
                 List newListMember = new List(dt, main, wwArray, clouds, wind, rain, sys2, date);
                 weatherList.add(newListMember);
+                Log.d("Database", "New label added");
             }
 
+            WeatherRecord record = new WeatherRecord(city, cod, message, cnt, weatherList);
+            record.save();
 
 
         } catch (Exception e) {
