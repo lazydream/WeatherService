@@ -39,7 +39,6 @@ public class WeatherTask extends AsyncTask {
             String response = CharStreams.toString(new InputStreamReader(connection.getInputStream()));
 
             //Очистили БД от предыдущих запросов
-            WeatherRecord.deleteAll(WeatherRecord.class);
 
             //Получили весь JSON
             JSONObject jsonObject = new JSONObject(response);
