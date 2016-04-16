@@ -1,4 +1,4 @@
-package com.example.kazimir.weatherservice.Models.Weather;
+package com.example.kazimir.weatherservice.Models.weather;
 
 import java.util.ArrayList;
 

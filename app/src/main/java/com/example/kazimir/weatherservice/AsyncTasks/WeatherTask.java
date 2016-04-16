@@ -3,19 +3,17 @@ package com.example.kazimir.weatherservice.AsyncTasks;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.example.kazimir.weatherservice.Models.Weather.City;
-import com.example.kazimir.weatherservice.Models.Weather.Clouds;
-import com.example.kazimir.weatherservice.Models.Weather.Coord;
-import com.example.kazimir.weatherservice.Models.Weather.List;
-import com.example.kazimir.weatherservice.Models.Weather.Main;
-import com.example.kazimir.weatherservice.Models.Weather.Rain;
-import com.example.kazimir.weatherservice.Models.Weather.Sys;
-import com.example.kazimir.weatherservice.Models.Weather.Sys2;
-import com.example.kazimir.weatherservice.Models.Weather.Weather;
-import com.example.kazimir.weatherservice.Models.Weather.WeatherRecord;
-import com.example.kazimir.weatherservice.Models.Weather.WeatherRoot;
-import com.example.kazimir.weatherservice.Models.Weather.Wind;
-import com.google.common.base.Strings;
+import com.example.kazimir.weatherservice.Models.weather.City;
+import com.example.kazimir.weatherservice.Models.weather.Clouds;
+import com.example.kazimir.weatherservice.Models.weather.Coord;
+import com.example.kazimir.weatherservice.Models.weather.List;
+import com.example.kazimir.weatherservice.Models.weather.Main;
+import com.example.kazimir.weatherservice.Models.weather.Rain;
+import com.example.kazimir.weatherservice.Models.weather.Sys;
+import com.example.kazimir.weatherservice.Models.weather.Sys2;
+import com.example.kazimir.weatherservice.Models.weather.Weather;
+import com.example.kazimir.weatherservice.Models.weather.WeatherData;
+import com.example.kazimir.weatherservice.Models.weather.Wind;
 import com.google.common.io.CharStreams;
 
 import org.json.JSONArray;
@@ -26,12 +24,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
+
 /**
  * Created by Kazimir on 15.04.2016.
  */
 public class WeatherTask extends AsyncTask {
     @Override
     protected Object doInBackground(Object[] params) {
+        Realm realm = null;
         try {
             URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/city?id=524901&APPID=f8da2500f4b2e7de706cac63323ac431");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -40,6 +43,16 @@ public class WeatherTask extends AsyncTask {
             String response = CharStreams.toString(new InputStreamReader(connection.getInputStream()));
 
             //Очистили БД от предыдущих запросов
+            realm = Realm.getDefaultInstance();
+            RealmQuery<WeatherData> query = realm.where(WeatherData.class);
+            RealmResults<WeatherData> result = query.findAll();
+            Log.d("Database", String.valueOf(result.size()));
+            realm.beginTransaction();
+            realm.deleteAll();
+            realm.commitTransaction();
+            RealmResults newResult = realm.where(WeatherData.class)
+                    .findAll();
+            Log.d("Database", String.valueOf(newResult.size()));
 
             //Получили весь JSON
             JSONObject jsonObject = new JSONObject(response);
@@ -47,7 +60,7 @@ public class WeatherTask extends AsyncTask {
             //Получили объект City
             JSONObject cityObject = jsonObject.getJSONObject("city");
             int cityId = cityObject.getInt("id");
-            String cityName = cityObject.getString("name");
+            final String cityName = cityObject.getString("name");
 
             //Получили объект Coord
             JSONObject coordObject = cityObject.getJSONObject("coord");
@@ -81,11 +94,11 @@ public class WeatherTask extends AsyncTask {
                 int dt = object.getInt("dt");
 
                 JSONObject mainObject = object.getJSONObject("main");
-                double temp = mainObject.getDouble("temp");
+                final double temp = mainObject.getDouble("temp");
                 Log.d("Database", String.valueOf(temp));
-                double temp_min = mainObject.getDouble("temp_min");
-                double temp_max = mainObject.getDouble("temp_max");
-                double pressure = mainObject.getDouble("pressure");
+                final double temp_min = mainObject.getDouble("temp_min");
+                final double temp_max = mainObject.getDouble("temp_max");
+                final double pressure = mainObject.getDouble("pressure");
                 double sea_level = mainObject.getDouble("sea_level");
                 double grnd_level = mainObject.getDouble("grnd_level");
                 int humidity = mainObject.getInt("humidity");
@@ -94,9 +107,9 @@ public class WeatherTask extends AsyncTask {
                 Main main = new Main(temp, temp_min, pressure, temp_max, sea_level, grnd_level, humidity, temp_kf);
 
                 JSONArray weatherinweatgerArray = object.getJSONArray("weather");
-                ArrayList<Weather> wwArray = new ArrayList<>();
-                for (int j=0;j<weatherinweatgerArray.length(); j++) {
-                    JSONObject wwObject = weatherinweatgerArray.getJSONObject(i);
+                final ArrayList<Weather> wwArray = new ArrayList<>();
+                for (int j=0; j<weatherinweatgerArray.length(); j++) {
+                    JSONObject wwObject = weatherinweatgerArray.getJSONObject(j);
                     int id = wwObject.getInt("id");
                     String mainString = wwObject.getString("main");
                     String description = wwObject.getString("description");
@@ -110,7 +123,7 @@ public class WeatherTask extends AsyncTask {
                 Clouds clouds = new Clouds(all);
 
                 JSONObject windObject = object.getJSONObject("wind");
-                double speed = windObject.getDouble("speed");
+                final double speed = windObject.getDouble("speed");
                 double deg = windObject.getDouble("deg");
                 Wind wind = new Wind(speed, deg);
 
@@ -127,18 +140,36 @@ public class WeatherTask extends AsyncTask {
                 String pod = wwSysObject.getString("pod");
                 Sys2 sys2 = new Sys2(pod);
 
-                String date = object.getString("dt_txt");
+                final String date = object.getString("dt_txt");
 
                 List newListMember = new List(dt, main, wwArray, clouds, wind, rain, sys2, date);
                 weatherList.add(newListMember);
                 Log.d("Database", "New label added");
-                WeatherRecord record = new WeatherRecord(temp, temp_min, temp_max, speed, pressure, cityName, wwArray.get(0).getMain(), wwArray.get(0).getDescription(), date);
-                record.save();
+                WeatherData record = new WeatherData(temp, temp_min, temp_max, speed, pressure, cityName, wwArray.get(0).getMain(), wwArray.get(0).getDescription(), date);
+
+                //Сохранение записей в Realm
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        WeatherData weatherData = realm.createObject(WeatherData.class);
+                        weatherData.setTemp(temp);
+                        weatherData.setTemp_min(temp_min);
+                        weatherData.setTemp_max(temp_max);
+                        weatherData.setWindSpeed(speed);
+                        weatherData.setPressure(pressure);
+                        weatherData.setCity(cityName);
+                        weatherData.setWeatherMain(wwArray.get(0).getMain());
+                        weatherData.setWeatherDescription(wwArray.get(0).getDescription());
+                        weatherData.setDateAndTime(date);
+                    }
+                });
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (realm != null) {
+                realm.close();
+            }
         }
         return null;
     }
