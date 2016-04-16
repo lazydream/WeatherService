@@ -11,8 +11,11 @@ import com.example.kazimir.weatherservice.Models.weather.WeatherData;
 import com.example.kazimir.weatherservice.Services.WeatherService;
 import com.orm.SugarContext;
 
+import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmMigration;
+import io.realm.RealmSchema;
 
 public class MainActivity extends AppCompatActivity {
     WeatherTask task;

@@ -48,14 +48,14 @@ public class WeatherService extends Service {
     private void sendNotification() {
         SimpleDateFormat dateFormat =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         realm = Realm.getDefaultInstance();
-        WeatherData currentWeather = realm.where(WeatherData.class).findFirst();
+        WeatherData weatherData = realm.where(WeatherData.class).findFirst();
+        Log.d("Service", "Данные из бд " + String.valueOf(weatherData.getTemp() + " " + weatherData.getTemp_min() + " " + weatherData.getTemp_max() + " " + weatherData.getWindSpeed() + ""
+                + weatherData.getPressure() + " " + weatherData.getCity() + " " + weatherData.getWeatherMain() + " " + weatherData.getWeatherDescription() + " " + weatherData.getDateAndTime()));
         NotificationManager manager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         Notification.Builder builder = new Notification.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(currentWeather.getDateAndTime())
-                .setSubText(currentWeather.getWeatherMain())
-                .setWhen(System.currentTimeMillis())
-                .setOngoing(true);
+                .setContentTitle(weatherData.getDateAndTime())
+                .setContentText(weatherData.getWeatherMain() + "\n" + weatherData.getWeatherDescription());
         Notification notification = builder.build();
         manager.notify(CURRENT_WEATHER_NOTIF_ID, notification);
 
@@ -69,7 +69,7 @@ public class WeatherService extends Service {
                     weatherTask.execute(MainActivity.class);
                     sendNotification();
                     Log.d("Service", "Обратились к сервису и вывели погоду");
-                    Thread.sleep(2000);
+                    Thread.sleep(60000);
                     refresh();
                 } catch (Exception e) {
                     e.printStackTrace();

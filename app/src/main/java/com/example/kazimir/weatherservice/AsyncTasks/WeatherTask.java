@@ -46,13 +46,11 @@ public class WeatherTask extends AsyncTask {
             realm = Realm.getDefaultInstance();
             RealmQuery<WeatherData> query = realm.where(WeatherData.class);
             RealmResults<WeatherData> result = query.findAll();
-            Log.d("Database", String.valueOf(result.size()));
             realm.beginTransaction();
             realm.deleteAll();
             realm.commitTransaction();
             RealmResults newResult = realm.where(WeatherData.class)
                     .findAll();
-            Log.d("Database", String.valueOf(newResult.size()));
 
             //Получили весь JSON
             JSONObject jsonObject = new JSONObject(response);
@@ -95,7 +93,6 @@ public class WeatherTask extends AsyncTask {
 
                 JSONObject mainObject = object.getJSONObject("main");
                 final double temp = mainObject.getDouble("temp");
-                Log.d("Database", String.valueOf(temp));
                 final double temp_min = mainObject.getDouble("temp_min");
                 final double temp_max = mainObject.getDouble("temp_max");
                 final double pressure = mainObject.getDouble("pressure");
@@ -144,7 +141,6 @@ public class WeatherTask extends AsyncTask {
 
                 List newListMember = new List(dt, main, wwArray, clouds, wind, rain, sys2, date);
                 weatherList.add(newListMember);
-                Log.d("Database", "New label added");
                 WeatherData record = new WeatherData(temp, temp_min, temp_max, speed, pressure, cityName, wwArray.get(0).getMain(), wwArray.get(0).getDescription(), date);
 
                 //Сохранение записей в Realm

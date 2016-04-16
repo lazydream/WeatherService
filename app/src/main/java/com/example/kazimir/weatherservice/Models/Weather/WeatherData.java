@@ -1,6 +1,7 @@
 package com.example.kazimir.weatherservice.Models.weather;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Required;
 
 /**
  * Created by Kazimir on 15.04.2016.
@@ -12,9 +13,13 @@ public class WeatherData extends RealmObject {
     private double temp_max;
     private double pressure;
     private double windSpeed;
+    @Required
     private String city;
+    @Required
     private String weatherMain;
+    @Required
     private String weatherDescription;
+    @Required
     private String dateAndTime;
 
     public void setTemp(double temp) {
