@@ -1,14 +1,30 @@
 package com.example.kazimir.weatherservice.Services;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
+
+import com.example.kazimir.weatherservice.AsyncTasks.WeatherTask;
+import com.example.kazimir.weatherservice.MainActivity;
+import com.example.kazimir.weatherservice.Models.weather.WeatherData;
+import com.example.kazimir.weatherservice.R;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import io.realm.Realm;
+import io.realm.RealmQuery;
 
 public class WeatherService extends Service {
+    private static final int CURRENT_WEATHER_NOTIF_ID = 1;
+    Realm realm = null;
     public WeatherService() {
     }
 
@@ -25,24 +41,40 @@ public class WeatherService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        try{
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/city?id=524901&APPID=f8da2500f4b2e7de706cac63323ac431");
-                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                        connection.setRequestMethod("GET");
-                        connection.connect();
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        refresh();
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void sendNotification() {
+        SimpleDateFormat dateFormat =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        realm = Realm.getDefaultInstance();
+        WeatherData currentWeather = realm.where(WeatherData.class).findFirst();
+        NotificationManager manager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        Notification.Builder builder = new Notification.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(currentWeather.getDateAndTime())
+                .setSubText(currentWeather.getWeatherMain())
+                .setWhen(System.currentTimeMillis())
+                .setOngoing(true);
+        Notification notification = builder.build();
+        manager.notify(CURRENT_WEATHER_NOTIF_ID, notification);
+
+    }
+    private void refresh() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    WeatherTask weatherTask = new WeatherTask();
+                    weatherTask.execute(MainActivity.class);
+                    sendNotification();
+                    Log.d("Service", "Обратились к сервису и вывели погоду");
+                    Thread.sleep(2000);
+                    refresh();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }
