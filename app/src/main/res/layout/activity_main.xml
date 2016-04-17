@@ -5,8 +5,9 @@
     android:layout_height="match_parent"
     tools:context="com.example.kazimir.weatherservice.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="The weather is" />
+    <ListView
+        android:id="@+id/lv_adapter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </ListView>
 </RelativeLayout>

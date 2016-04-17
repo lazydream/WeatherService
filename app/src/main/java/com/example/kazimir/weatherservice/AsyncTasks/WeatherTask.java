@@ -124,13 +124,13 @@ public class WeatherTask extends AsyncTask {
                 double deg = windObject.getDouble("deg");
                 Wind wind = new Wind(speed, deg);
 
-                JSONObject rainObject = object.getJSONObject("rain");
+               // JSONObject rainObject = object.getJSONObject("rain");
                 double rainVal;
-                if (rainObject.has("3h")) {
-                    rainVal = rainObject.getDouble("3h");
-                } else {
+                //if (rainObject.has("3h")) {
+                //    rainVal = rainObject.getDouble("3h");
+                //} else {
                     rainVal =0;
-                }
+                //}
                 Rain rain = new Rain(rainVal);
 
                 JSONObject wwSysObject = object.getJSONObject("sys");
@@ -169,4 +169,5 @@ public class WeatherTask extends AsyncTask {
         }
         return null;
     }
+
 }

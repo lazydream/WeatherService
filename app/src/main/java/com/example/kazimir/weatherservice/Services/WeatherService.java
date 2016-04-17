@@ -2,9 +2,11 @@ package com.example.kazimir.weatherservice.Services;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.support.v4.media.MediaBrowserCompat;
 import android.util.Log;
 
 import com.example.kazimir.weatherservice.AsyncTasks.WeatherTask;
@@ -18,13 +20,21 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmQuery;
 
 public class WeatherService extends Service {
     private static final int CURRENT_WEATHER_NOTIF_ID = 1;
+    private static final int REQUEST_ID = 2;
+    public static final String WEATHER_FROM_SERVICE = "Weather from service";
+
     Realm realm = null;
+    private RealmConfiguration realmConfiguration;
+    private PendingIntent pendingIntent;
+
     public WeatherService() {
     }
 
@@ -36,6 +46,8 @@ public class WeatherService extends Service {
 
     @Override
     public void onCreate() {
+        realmConfiguration = new RealmConfiguration.Builder(this).build();
+        Realm.setDefaultConfiguration(realmConfiguration);
         super.onCreate();
     }
 
@@ -47,19 +59,26 @@ public class WeatherService extends Service {
 
     private void sendNotification() {
         SimpleDateFormat dateFormat =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         realm = Realm.getDefaultInstance();
         WeatherData weatherData = realm.where(WeatherData.class).findFirst();
-        Log.d("Service", "Данные из бд " + String.valueOf(weatherData.getTemp() + " " + weatherData.getTemp_min() + " " + weatherData.getTemp_max() + " " + weatherData.getWindSpeed() + ""
-                + weatherData.getPressure() + " " + weatherData.getCity() + " " + weatherData.getWeatherMain() + " " + weatherData.getWeatherDescription() + " " + weatherData.getDateAndTime()));
         NotificationManager manager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+
         Notification.Builder builder = new Notification.Builder(this)
+                .setContentIntent(pIntent)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(weatherData.getDateAndTime())
                 .setContentText(weatherData.getWeatherMain() + "\n" + weatherData.getWeatherDescription());
         Notification notification = builder.build();
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
         manager.notify(CURRENT_WEATHER_NOTIF_ID, notification);
 
     }
+
     private void refresh() {
         new Thread(new Runnable() {
             @Override
@@ -69,7 +88,7 @@ public class WeatherService extends Service {
                     weatherTask.execute(MainActivity.class);
                     sendNotification();
                     Log.d("Service", "Обратились к сервису и вывели погоду");
-                    Thread.sleep(60000);
+                    Thread.sleep(600000);
                     refresh();
                 } catch (Exception e) {
                     e.printStackTrace();
