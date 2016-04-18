@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.media.MediaBrowserCompat;
 import android.util.Log;
@@ -58,7 +59,6 @@ public class WeatherService extends Service {
     }
 
     private void sendNotification() {
-        SimpleDateFormat dateFormat =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         realm = Realm.getDefaultInstance();
         WeatherData weatherData = realm.where(WeatherData.class).findFirst();
@@ -76,7 +76,7 @@ public class WeatherService extends Service {
         Notification notification = builder.build();
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         manager.notify(CURRENT_WEATHER_NOTIF_ID, notification);
-
+        realm.close();
     }
 
     private void refresh() {
@@ -86,9 +86,14 @@ public class WeatherService extends Service {
                 try{
                     WeatherTask weatherTask = new WeatherTask();
                     weatherTask.execute(MainActivity.class);
+                    while(weatherTask.getStatus() != AsyncTask.Status.FINISHED) {
+                        Thread.sleep(100);
+                    }
+                    Intent sendIntent = new Intent("Action");
+                    sendBroadcast(sendIntent);
+
                     sendNotification();
-                    Log.d("Service", "Обратились к сервису и вывели погоду");
-                    Thread.sleep(600000);
+                    Thread.sleep(6000);
                     refresh();
                 } catch (Exception e) {
                     e.printStackTrace();

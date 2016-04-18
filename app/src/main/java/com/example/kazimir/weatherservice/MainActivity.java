@@ -3,9 +3,13 @@ package com.example.kazimir.weatherservice;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -23,10 +27,9 @@ import io.realm.RealmResults;
 import io.realm.RealmSchema;
 
 public class MainActivity extends AppCompatActivity {
-    public static final int PI_MAIN = 1;
-    public static final String PARAM_PINTENT = "pendingIntent";
+
     ListView listAdapterView;
-    WeatherTask task;
+    WeatherAdapter weatherAdapter;
     Realm realm;
     private RealmConfiguration realmConfiguration;
 
@@ -38,24 +41,32 @@ public class MainActivity extends AppCompatActivity {
         realmConfiguration = new RealmConfiguration.Builder(this).build();
         Realm.setDefaultConfiguration(realmConfiguration);
 
+        initAdapter();
+
+        BroadcastReceiver reciever = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("Reciever", "Уведомление получено");
+                updateAdapter();
+            }
+        };
+        IntentFilter filter = new IntentFilter("Action");
+        registerReceiver(reciever, filter);
+
         Intent intent = new Intent(getApplicationContext(), WeatherService.class);
         startService(intent);
+    }
 
+    private void initAdapter() {
         realm = Realm.getDefaultInstance();
         RealmResults<WeatherData> weatherDatas = realm.where(WeatherData.class).findAll();
 
         listAdapterView = (ListView) findViewById(R.id.lv_adapter);
-        WeatherAdapter weatherAdapter = new WeatherAdapter(this, R.layout.weather_item, weatherDatas);
+        weatherAdapter = new WeatherAdapter(this, R.layout.weather_item, weatherDatas);
         listAdapterView.setAdapter(weatherAdapter);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
-            case PI_MAIN:
-
-                break;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
+    private void updateAdapter() {
+        weatherAdapter.notifyDataSetChanged();
     }
 }

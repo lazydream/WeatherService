@@ -19,15 +19,32 @@
             </intent-filter>
         </activity>
 
-        <meta-data android:name="DATABASE" android:value="sugarexample.db" />
-        <meta-data android:name="VERSION" android:value="2" />
-        <meta-data android:name="QUERY_LOG" android:value="true" />
-        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="com.example.kazimir.weatherservice.models.weather" />
+        <meta-data
+            android:name="DATABASE"
+            android:value="sugarexample.db" />
+        <meta-data
+            android:name="VERSION"
+            android:value="2" />
+        <meta-data
+            android:name="QUERY_LOG"
+            android:value="true" />
+        <meta-data
+            android:name="DOMAIN_PACKAGE_NAME"
+            android:value="com.example.kazimir.weatherservice.models.weather" />
 
         <service
             android:name=".Services.WeatherService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <receiver
+            android:name=".WeatherReciever"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="weather_reciever"></action>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

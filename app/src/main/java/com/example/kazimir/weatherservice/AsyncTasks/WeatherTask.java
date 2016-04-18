@@ -3,6 +3,7 @@ package com.example.kazimir.weatherservice.AsyncTasks;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.kazimir.weatherservice.MainActivity;
 import com.example.kazimir.weatherservice.Models.weather.City;
 import com.example.kazimir.weatherservice.Models.weather.Clouds;
 import com.example.kazimir.weatherservice.Models.weather.Coord;
@@ -169,5 +170,4 @@ public class WeatherTask extends AsyncTask {
         }
         return null;
     }
-
 }

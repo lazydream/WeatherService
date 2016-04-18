@@ -35,12 +35,13 @@ public class WeatherAdapter extends ArrayAdapter<WeatherData> {
         super(context, resource, weatherDatas);
         this.resource = resource;
         this.context = (Activity) context;
-        Realm realm = Realm.getDefaultInstance();
-        this.weatherDatas = realm.where(WeatherData.class).findAll();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        Realm realm = Realm.getDefaultInstance();
+        this.weatherDatas = realm.where(WeatherData.class).findAll();
+        realm.close();
 
         LayoutInflater inflater = context.getLayoutInflater();
         View templateView = inflater.inflate(R.layout.weather_item, null);
@@ -54,9 +55,9 @@ public class WeatherAdapter extends ArrayAdapter<WeatherData> {
         dateTextView.setText(weatherDatas.get(position).getDateAndTime());
         weatherMain.setText(weatherDatas.get(position).getWeatherMain());
         weatherDescription.setText(weatherDatas.get(position).getWeatherDescription());
-        currentTemp.setText(String.valueOf(weatherDatas.get(position).getTemp()));
-        minTemp.setText(String.valueOf(weatherDatas.get(position).getTemp_min()));
-        maxTemp.setText(String.valueOf(weatherDatas.get(position).getTemp_max()));
+        currentTemp.setText(String.valueOf(Math.round(weatherDatas.get(position).getTemp() - 273)) + "°C");
+        minTemp.setText(String.valueOf(Math.round(weatherDatas.get(position).getTemp_min() - 273)) + "°C");
+        maxTemp.setText(String.valueOf(Math.round(weatherDatas.get(position).getTemp_max() - 273)) + "°C");
 
         return  templateView;
     }
